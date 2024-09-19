@@ -46,21 +46,22 @@ struct ContentView: View {
         return rc
     }
     
+    // when swiping down on a month voiceover will only speak the high and low temperatures on the bottom chart.
     var body: some View {
         VStack {
             headerText("BAD")
             Chart {
-                ForEach(processedMonthlyInput) { series in
-                    ForEach(series.temperatures, id: \.month) { element in
+                ForEach(processedMonthlyInput) { oneMonth in
+                    ForEach(oneMonth.temperatures, id: \.month) { element in
                         LineMark(
                             x: .value("Month", element.month, unit: .month),
-                            y: .value("Temperature", element.sales.converted(to: .fahrenheit).value)
+                            y: .value("Temperature", element.tempVal.converted(to: .fahrenheit).value)
                         )
                         .accessibilityLabel("\(element.month.formatted(.dateTime.month(.wide)))")
-                        .accessibilityValue(Text("\(element.sales.converted(to: tempUnit).formatted(.measurement(width: .abbreviated, numberFormatStyle: .number.precision(.fractionLength(0)))))"))
+                        .accessibilityValue(Text("\(element.tempVal.converted(to: tempUnit).formatted(.measurement(width: .abbreviated, numberFormatStyle: .number.precision(.fractionLength(0)))))"))
                     }
-                    .symbol(by: .value("Type", series.theType))
-                    .foregroundStyle(by: .value("Type", series.theType))
+                    .symbol(by: .value("Type", oneMonth.theType))
+                    .foregroundStyle(by: .value("Type", oneMonth.theType))
                     .interpolationMethod(.catmullRom)
                 }
             }
@@ -69,17 +70,17 @@ struct ContentView: View {
             
             headerText("GOOD")
             Chart {
-                ForEach(processedMonthlyInput) { series in
-                    ForEach(series.temperatures, id: \.month) { element in
+                ForEach(processedMonthlyInput) { oneMonth in
+                    ForEach(oneMonth.temperatures, id: \.month) { element in
                         LineMark(
                             x: .value("Month", element.month, unit: .month),
-                            y: .value("Temperature", element.sales.converted(to: .fahrenheit).value)
+                            y: .value("Temperature", element.tempVal.converted(to: .fahrenheit).value)
                         )
-                        .accessibilityLabel("\(series.theType) \(element.month.formatted(.dateTime.month(.wide)))")
-                        .accessibilityValue(Text("\(series.theType) \(element.sales.converted(to: tempUnit).formatted(.measurement(width: .abbreviated, numberFormatStyle: .number.precision(.fractionLength(0)))))"))
+                        .accessibilityLabel("\(oneMonth.theType) \(element.month.formatted(.dateTime.month(.wide)))")
+                        .accessibilityValue(Text("\(oneMonth.theType) \(element.tempVal.converted(to: tempUnit).formatted(.measurement(width: .abbreviated, numberFormatStyle: .number.precision(.fractionLength(0)))))"))
                     }
-                    .symbol(by: .value("Type", series.theType))
-                    .foregroundStyle(by: .value("Type", series.theType))
+                    .symbol(by: .value("Type", oneMonth.theType))
+                    .foregroundStyle(by: .value("Type", oneMonth.theType))
                     .interpolationMethod(.catmullRom)
                 }
             }
@@ -103,11 +104,11 @@ struct ContentView: View {
         }
     }
     
-    func getInput(tempType : TempTypes) -> [(month: Date, sales : Measurement<UnitTemperature>)] {
-        var highResult : [(month: Date, sales : Measurement<UnitTemperature>)] = []
+    func getInput(tempType : TempTypes) -> [(month: Date, tempVal : Measurement<UnitTemperature>)] {
+        var highResult : [(month: Date, tempVal : Measurement<UnitTemperature>)] = []
         
         for oneMonth in months {
-            highResult.append((month: oneMonth, sales: .init(value: randomVal(tempType: tempType), unit: tempUnit)))
+            highResult.append((month: oneMonth, tempVal: .init(value: randomVal(tempType: tempType), unit: tempUnit)))
         }
         
         return highResult

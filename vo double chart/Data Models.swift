@@ -21,7 +21,7 @@ enum TempTypes {
 struct MonthlyChartTempData: Identifiable {
     let theType : String
 
-    let temperatures : [(month: Date, sales: Measurement<UnitTemperature>)]
+    let temperatures : [(month: Date, tempVal: Measurement<UnitTemperature>)]
 
     var id = UUID()
 }
