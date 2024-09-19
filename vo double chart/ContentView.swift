@@ -8,16 +8,6 @@
 import SwiftUI
 import Charts
 
-let calendar = Calendar.current
-let lowDescr = "Low"
-let highDescr = "High"
-let myMax = 3
-let tempUnit : UnitTemperature = .fahrenheit
-
-enum TempTypes {
-    case highTemp, lowTemp
-}
-
 struct ContentView: View {
     var startDate : Date {
         let currentYear = calendar.component(.year, from: Date())
@@ -45,6 +35,64 @@ struct ContentView: View {
         
         return rc
     }
+
+    
+    var processedMonthlyInput : [MonthlyChartTempData] {
+        var rc : [MonthlyChartTempData] = []
+        
+        rc.append(.init(theType: lowDescr, temperatures: getInput(tempType: .lowTemp)))
+        rc.append(.init(theType: highDescr, temperatures: getInput(tempType: .highTemp)))
+        
+        return rc
+    }
+    
+    var body: some View {
+        VStack {
+            headerText("BAD")
+            Chart {
+                ForEach(processedMonthlyInput) { series in
+                    ForEach(series.temperatures, id: \.month) { element in
+                        LineMark(
+                            x: .value("Month", element.month, unit: .month),
+                            y: .value("Temperature", element.sales.converted(to: .fahrenheit).value)
+                        )
+                        .accessibilityLabel("\(element.month.formatted(.dateTime.month(.wide)))")
+                        .accessibilityValue(Text("\(element.sales.converted(to: tempUnit).formatted(.measurement(width: .abbreviated, numberFormatStyle: .number.precision(.fractionLength(0)))))"))
+                    }
+                    .symbol(by: .value("Type", series.theType))
+                    .foregroundStyle(by: .value("Type", series.theType))
+                    .interpolationMethod(.catmullRom)
+                }
+            }
+            .frame(maxHeight: paddingAmount)
+            .padding(.horizontal)
+            
+            headerText("GOOD")
+            Chart {
+                ForEach(processedMonthlyInput) { series in
+                    ForEach(series.temperatures, id: \.month) { element in
+                        LineMark(
+                            x: .value("Month", element.month, unit: .month),
+                            y: .value("Temperature", element.sales.converted(to: .fahrenheit).value)
+                        )
+                        .accessibilityLabel("\(series.theType) \(element.month.formatted(.dateTime.month(.wide)))")
+                        .accessibilityValue(Text("\(series.theType) \(element.sales.converted(to: tempUnit).formatted(.measurement(width: .abbreviated, numberFormatStyle: .number.precision(.fractionLength(0)))))"))
+                    }
+                    .symbol(by: .value("Type", series.theType))
+                    .foregroundStyle(by: .value("Type", series.theType))
+                    .interpolationMethod(.catmullRom)
+                }
+            }
+            .frame(maxHeight: paddingAmount)
+            .padding(.horizontal)
+        }
+    }
+    
+    func headerText(_ value : String) -> some View {
+        Text(value)
+            .font(.largeTitle)
+            .fontWeight(.heavy)
+    }
     
     func randomVal(tempType : TempTypes) -> Double {
         switch tempType {
@@ -63,39 +111,6 @@ struct ContentView: View {
         }
         
         return highResult
-    }
-    
-    var processedMonthlyInput : [MonthlyChartTempData] {
-        var rc : [MonthlyChartTempData] = []
-        
-        rc.append(.init(theType: lowDescr, temperatures: getInput(tempType: .lowTemp)))
-        rc.append(.init(theType: highDescr, temperatures: getInput(tempType: .highTemp)))
-        
-        return rc
-    }
-    
-    var body: some View {
-        VStack {
-            Chart {
-                ForEach(processedMonthlyInput) { series in
-                    ForEach(series.temperatures, id: \.month) { element in
-                        LineMark(
-                            x: .value("Month", element.month, unit: .month),
-                            y: .value("Temperature", element.sales.converted(to: .fahrenheit).value)
-                        )
-                        //.accessibilityLabel("\(element.month.formatted(.dateTime.month(.wide)))")
-                        //.accessibilityValue(Text("\(element.sales.converted(to: tempUnit).formatted())"))
-                        .accessibilityLabel("\(series.theType) \(element.month.formatted(.dateTime.month(.wide)))")
-                        .accessibilityValue(Text("\(series.theType) \(element.sales.converted(to: tempUnit).formatted())"))
-                    }
-                    .symbol(by: .value("Type", series.theType))
-                    .foregroundStyle(by: .value("Type", series.theType))
-                    .interpolationMethod(.catmullRom)
-                }
-            }
-            .frame(maxHeight: 200)
-            .padding(.horizontal)
-        }
     }
 }
 
